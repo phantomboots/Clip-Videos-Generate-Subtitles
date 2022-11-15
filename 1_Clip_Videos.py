@@ -19,7 +19,7 @@
 # Instructions:
 #   1) Check that all required modules are installed.
 #   2) Ensure input videos are named following this format:
-#      TripID_DiveID_YYYMMDD_HHMMSS.mp4
+#      TripID_DiveID_YYYMMDD_HHMMSS.mp4, with no other underscores
 #   3) Modify inputs section below as needed.
 ###################################################################
 
