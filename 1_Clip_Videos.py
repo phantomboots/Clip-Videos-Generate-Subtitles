@@ -136,12 +136,9 @@ for video in videofiles:
         strstarttime = starttime.strftime('%Y%m%d_%H%M%S')
         clipname = outputdir +'/'+ tripid +'_'+ divename + '_' + strstarttime + '.mp4'
 
-        # One minute before start time to speed up video clipping, ffmpeg call adds a minute to this
-        minusone = elapsedSecs - timedelta(minutes=1)
-        minusone = str(minusone)
-
         # Clip video
-        clipcall = ('ffmpeg -ss ' + minusone + ' -i ' + videopath + '/' + video + ' -ss 00:01:00 -t 00:' + clipsize + ':00 -c copy ' + clipname)
+        elapsedtime = str(elapsedSecs)
+        clipcall = ('ffmpeg -ss ' + elapsedtime + ' -i ' + videopath + '/' + video + ' -t 00:' + clipsize + ':00 -c copy ' + clipname)
         subprocess.call(clipcall, shell = True)
 
         # Add to elapsed seconds
