@@ -114,9 +114,13 @@ for video in videofiles:
     transectStartDateTime = transectStartDateTime - timedelta(seconds=30)
     transectEndDateTime = transectEndDateTime + timedelta(seconds=30)
 
-    # Calculate the elapsed time to the start of transect to begin the first video clip
+    # Set transect start as videostart if transect start occurs before video starts
+    if videoStartDateTime > transectStartDateTime:
+        transectStartDateTime = videoStartDateTime
+
+    # Calculate the elapsed seconds to the start of transect to begin the first video clip
     elapsedSecs = transectStartDateTime - videoStartDateTime
-    
+
     # Get duration of video file in seconds
     durcall = ('ffprobe -v error -show_entries format=duration ' + videopath + '/' + video )
     durproc = subprocess.run(durcall, shell=True, capture_output=True, text=True)
@@ -127,7 +131,6 @@ for video in videofiles:
     if elapsedSecs_endtransect > dur:
         print("Warning! Transect " + divename + " ends after the video file finishes")
 
-
     # Clip videos while elpased time is less than duration
     while elapsedSecs.seconds < elapsedSecs_endtransect:
 
@@ -136,12 +139,18 @@ for video in videofiles:
         strstarttime = starttime.strftime('%Y%m%d_%H%M%S')
         clipname = outputdir +'/'+ tripid +'_'+ divename + '_' + strstarttime + '.mp4'
 
-        # Clip video
-        elapsedtime = str(elapsedSecs)
-        clipcall = ('ffmpeg -ss ' + elapsedtime + ' -i ' + videopath + '/' + video + ' -t 00:' + clipsize + ':00 -c copy ' + clipname)
-        subprocess.call(clipcall, shell = True)
+        # Clip video 
+        if elapsedSecs.total_seconds() > 5: # to buffer against copy issue with often leaves 5 seconds of jumpy video
+            elapsedtime = elapsedSecs - timedelta(seconds=5)
+            elapsedtime = str(elapsedtime)
+            clipcall = ('ffmpeg -ss ' + elapsedtime + ' -i ' + videopath + '/' + video + ' -t 00:' + clipsize + ':05 -vcodec copy -acodec copy ' + clipname)
+            subprocess.call(clipcall, shell = True)
+        else:
+            elapsedtime = str(elapsedSecs)
+            clipcall = ('ffmpeg -ss ' + elapsedtime + ' -i ' + videopath + '/' + video + ' -t 00:' + clipsize + ':00 -vcodec copy -acodec copy ' + clipname)
+            subprocess.call(clipcall, shell = True) 
 
         # Add to elapsed seconds
         elapsedSecs = elapsedSecs + timedelta(minutes=int(clipsize))
 
-
+        
